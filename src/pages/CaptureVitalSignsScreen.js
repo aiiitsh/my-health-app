@@ -11,7 +11,7 @@ const CaptureVitalSignsScreen = ({ navigation }) => {
   useFocusEffect(
     React.useCallback(() => {
       setCountdown(10);
-      return () => {}; // no cleanup needed here
+      return () => {};
     }, [])
   );
 
@@ -40,6 +40,10 @@ const CaptureVitalSignsScreen = ({ navigation }) => {
         <ActivityIndicator size="large" color="#007AFF" style={styles.loader} />
         <Text style={styles.loadingText}>Capturing Vital Signs</Text>
         <Text style={styles.timer}>{countdown}</Text>
+        {/* Face guide overlay */}
+        <View style={styles.faceGuideContainer}>
+          <View style={styles.faceGuide} />
+        </View>
       </View>
     </View>
   );
@@ -55,8 +59,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   overlay: {
-    position: 'absolute',
-    top: 0, left: 0, right: 0, bottom: 0,
+    ...StyleSheet.absoluteFillObject,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -76,6 +79,22 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.5)',
     padding: 10,
     borderRadius: 10,
+    marginBottom: 20,
+  },
+  faceGuideContainer: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  faceGuide: {
+    width: 270,
+    height: 300,
+    borderWidth: 3,
+    borderColor: '#fff',
+    borderRadius: 10,
+    backgroundColor: 'rgba(255,255,255,0.1)', // Slight transparent fill for emphasis
   },
 });
 

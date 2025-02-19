@@ -1,6 +1,6 @@
 // src/pages/VideoCallScreen.js
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { Video } from 'expo-av';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
@@ -71,7 +71,7 @@ const VideoCallScreen = ({ navigation }) => {
     },
   ];
 
-  // Split vital signs into two columns
+  // Split the vital signs into two columns (first three on the left, last three on the right)
   const leftColumn = vitalSigns.slice(0, 3);
   const rightColumn = vitalSigns.slice(3, 6);
 
@@ -109,6 +109,14 @@ const VideoCallScreen = ({ navigation }) => {
         >
           <MaterialCommunityIcons name="phone-hangup" size={36} color="#fff" />
         </TouchableOpacity>
+        {/* Small preview rectangle at bottom right */}
+        <View style={styles.previewContainer}>
+          <Image
+            source={require('../../assets/face2.jpg')}
+            style={styles.previewImage}
+            resizeMode="cover"
+          />
+        </View>
       </View>
     </View>
   );
@@ -132,8 +140,8 @@ const styles = StyleSheet.create({
   vitalsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 40, // shift the vitals higher on the screen
-    marginBottom: 80, // leave room for the hangup button
+    marginTop: 40, // shift vitals higher
+    marginBottom: 80, // leave room for hangup button
   },
   vitalColumn: {
     flex: 1,
@@ -160,6 +168,22 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 30,
     zIndex: 1,
+  },
+  previewContainer: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+    width: 120,
+    height: 90,
+    borderWidth: 2,
+    borderColor: '#fff',
+    borderRadius: 8,
+    overflow: 'hidden',
+    backgroundColor: '#000',
+  },
+  previewImage: {
+    width: '100%',
+    height: '100%',
   },
 });
 

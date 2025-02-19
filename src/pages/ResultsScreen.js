@@ -13,8 +13,7 @@ const ResultsScreen = ({ navigation }) => {
     const bloodPressure = `${systolic}/${diastolic} mmHg`;
     const respiratoryRate = Math.floor(Math.random() * (20 - 12 + 1)) + 12;
     const temperature = (Math.random() * (37.5 - 36.5) + 36.5).toFixed(1) + '°C';
-    // Use Unicode escape for % to avoid formatting issues
-    const oxygenSaturation = Math.floor(Math.random() * (100 - 95 + 1)) + 95 + '\u0025';
+    const oxygenSaturation = Math.floor(Math.random() * (100 - 95 + 1)) + 95 + '%';
     const bloodGlucose = Math.floor(Math.random() * (120 - 80 + 1)) + 80 + ' mg/dL';
 
     return {
@@ -43,12 +42,18 @@ const ResultsScreen = ({ navigation }) => {
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.header}>Your Results</Text>
       <View style={styles.boxContainer}>
-        <VitalSignBox title="Heart Rate" reading={vitals.heartRate} icon="❤️" />
-        <VitalSignBox title="Blood Pressure" reading={vitals.bloodPressure} icon="💓" />
-        <VitalSignBox title="Respiratory Rate" reading={vitals.respiratoryRate} icon="🌬️" />
-        <VitalSignBox title="Temperature" reading={vitals.temperature} icon="🌡️" />
-        <VitalSignBox title="Oxygen Saturation" reading={vitals.oxygenSaturation} icon="🫁" />
-        <VitalSignBox title="Blood Glucose" reading={vitals.bloodGlucose} icon="🍭" />
+        <View style={styles.row}>
+          <VitalSignBox title="Heart Rate" reading={vitals.heartRate} icon="❤️" />
+          <VitalSignBox title="Blood Pressure" reading={vitals.bloodPressure} icon="💓" />
+        </View>
+        <View style={styles.row}>
+          <VitalSignBox title="Respiratory Rate" reading={vitals.respiratoryRate} icon="🌬️" />
+          <VitalSignBox title="Temperature" reading={vitals.temperature} icon="🌡️" />
+        </View>
+        <View style={styles.row}>
+          <VitalSignBox title="Oxygen Saturation" reading={vitals.oxygenSaturation} icon="🫁" />
+          <VitalSignBox title="Blood Glucose" reading={vitals.bloodGlucose} icon="🍭" />
+        </View>
       </View>
       <View style={styles.buttonContainer}>
         <TouchableOpacity style={styles.button} onPress={handleSave}>
@@ -77,9 +82,14 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   boxContainer: {
+    alignItems: 'center',
+  },
+  row: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center', // centers the boxes horizontally
+    justifyContent: 'space-between',
+    width: '100%',
+    paddingHorizontal: 10,
+    marginBottom: 10,
   },
   buttonContainer: {
     flexDirection: 'row',
