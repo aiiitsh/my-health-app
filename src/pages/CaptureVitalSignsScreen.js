@@ -1,46 +1,115 @@
 // src/pages/CaptureVitalSignsScreen.js
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, ActivityIndicator, Button } from 'react-native';
+import { CameraView, useCameraPermissions } from 'expo-camera';      // :contentReference[oaicite:0]{index=0}
 import { Video } from 'expo-av';
 import { useFocusEffect } from '@react-navigation/native';
 
 const CaptureVitalSignsScreen = ({ navigation }) => {
+  const [permission, requestPermission] = useCameraPermissions();
   const [countdown, setCountdown] = useState(10);
+  const cameraRef = useRef(null);
+  const [recording, setRecording] = useState(false);
+  const [videoUri, setVideoUri] = useState(null);
 
-  // Reset the countdown timer every time the screen is focused.
+  // 1️⃣ Ask for camera permission on mount
+  useEffect(() => {
+    (async () => {
+      if (!permission?.granted) {
+        await requestPermission();
+      }
+    })();
+  }, [permission, requestPermission]);
+
+  // 2️⃣ Reset state whenever this screen is focused
   useFocusEffect(
     React.useCallback(() => {
       setCountdown(10);
-      return () => {};
+      setVideoUri(null);
+      setRecording(false);
     }, [])
   );
 
-  // Countdown effect: decrement the timer every second.
+  // 3️⃣ Kick off recording at t = 10
+  useEffect(() => {
+    if (permission?.granted && !recording && countdown === 10) {
+      startRecording();
+    }
+  }, [permission, recording, countdown]);
+
+  // 4️⃣ Countdown → stop & navigate at 0
   useEffect(() => {
     if (countdown <= 0) {
-      navigation.navigate('Results');
+      if (recording) {
+        cameraRef.current?.stopRecording();
+      }
+      navigation.navigate('Results', { videoUri });
       return;
     }
-    const timer = setInterval(() => {
-      setCountdown(prev => prev - 1);
-    }, 1000);
+    const timer = setInterval(() => setCountdown((t) => t - 1), 1000);
     return () => clearInterval(timer);
-  }, [countdown, navigation]);
+  }, [countdown, recording, navigation, videoUri]);
+
+  // 📹 10-second capture helper
+  const startRecording = async () => {
+    if (!cameraRef.current) return;
+    setRecording(true);
+    try {
+      const { uri } = await cameraRef.current.recordAsync({
+        maxDuration: 10,
+      });
+      setVideoUri(uri);
+    } catch (e) {
+      console.warn('Recording error:', e);
+    } finally {
+      setRecording(false);
+    }
+  };
+
+  // 🚫 Permission UI
+  if (!permission) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.permissionText}>Loading permissions…</Text>
+      </View>
+    );
+  }
+  if (!permission.granted) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.permissionText}>Camera access is required.</Text>
+        <Button title="Grant Permission" onPress={requestPermission} />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
-      <Video
-        source={require('../../assets/facevideo.mp4')}
-        style={styles.video}
-        shouldPlay
-        resizeMode="cover"
-        isLooping={false}
-      />
+      {videoUri ? (
+        // ▶️ Play back the recorded clip
+        <Video
+          source={{ uri: videoUri }}
+          style={styles.video}
+          shouldPlay
+          resizeMode="cover"
+          isLooping={false}
+        />
+      ) : (
+        // 📷 Live front-cam preview
+        <CameraView
+          ref={cameraRef}
+          style={styles.video}
+          facing="front"       // :contentReference[oaicite:1]{index=1}
+          mode="video"
+          videoQuality="480p"   // :contentReference[oaicite:2]{index=2}
+        />
+      )}
+
+      {/* your existing overlay */}
       <View style={styles.overlay}>
         <ActivityIndicator size="large" color="#007AFF" style={styles.loader} />
         <Text style={styles.loadingText}>Capturing Vital Signs</Text>
         <Text style={styles.timer}>{countdown}</Text>
-        {/* Face guide overlay */}
         <View style={styles.faceGuideContainer}>
           <View style={styles.faceGuide} />
         </View>
@@ -50,22 +119,20 @@ const CaptureVitalSignsScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#000',
+  container: { flex: 1, backgroundColor: '#000' },
+  permissionText: {
+    color: '#fff',
+    fontSize: 18,
+    textAlign: 'center',
+    margin: 20,
   },
-  video: {
-    flex: 1,
-    width: '100%',
-  },
+  video: { flex: 1, width: '100%' },
   overlay: {
     ...StyleSheet.absoluteFillObject,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  loader: {
-    marginBottom: 10,
-  },
+  loader: { marginBottom: 10 },
   loadingText: {
     fontSize: 24,
     color: '#007AFF',
@@ -94,7 +161,7 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     borderColor: '#fff',
     borderRadius: 10,
-    backgroundColor: 'rgba(255,255,255,0.1)', // Slight transparent fill for emphasis
+    backgroundColor: 'rgba(255,255,255,0.1)',
   },
 });
 
