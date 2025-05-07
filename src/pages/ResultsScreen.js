@@ -1,10 +1,45 @@
 // src/pages/ResultsScreen.js
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import * as Notifications from 'expo-notifications';
 import VitalSignBox from '../components/VitalSignBox';
+
+// Configure notification handler
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+  }),
+});
 
 const ResultsScreen = ({ navigation }) => {
   const [vitals, setVitals] = useState({});
+
+  // Generate random vitals once
+  useEffect(() => {
+    const generated = generateRandomVitals();
+    setVitals(generated);
+  }, []);
+
+  // Send local notification once vitals are generated
+  useEffect(() => {
+    if (vitals.heartRate) {
+      // Request permissions and send notification
+      (async () => {
+        const { status } = await Notifications.requestPermissionsAsync();
+        if (status === 'granted') {
+          await Notifications.scheduleNotificationAsync({
+            content: {
+              title: 'Your Vital Signs',
+              body: `Heart Rate: ${vitals.heartRate}, BP: ${vitals.bloodPressure}, Resp: ${vitals.respiratoryRate}, Temp: ${vitals.temperature}, O₂ Sat: ${vitals.oxygenSaturation}, Glucose: ${vitals.bloodGlucose}`,
+            },
+            trigger: null, // immediate
+          });
+        }
+      })();
+    }
+  }, [vitals]);
 
   const generateRandomVitals = () => {
     const heartRate = Math.floor(Math.random() * (100 - 60 + 1)) + 60;
@@ -25,10 +60,6 @@ const ResultsScreen = ({ navigation }) => {
       bloodGlucose,
     };
   };
-
-  useEffect(() => {
-    setVitals(generateRandomVitals());
-  }, []);
 
   const handleSave = () => {
     navigation.navigate('Reports', { savedVitals: vitals });

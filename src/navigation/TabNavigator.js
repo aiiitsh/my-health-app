@@ -10,6 +10,7 @@ import { AuthContext } from '../../App';
 import { Ionicons } from '@expo/vector-icons';
 import PatientsStackNavigator from './PatientsStackNavigator';
 import MyDoctorsScreen from '../pages/MyDoctorsScreen';
+import MapsScreen from '../pages/MapsScreen';  // <-- New import
 
 const Tab = createBottomTabNavigator();
 
@@ -21,18 +22,15 @@ const TabNavigator = () => {
          headerShown: false,
          tabBarIcon: ({ focused, color, size }) => {
            let iconName;
-           if (route.name === 'Home') {
-             iconName = focused ? 'home' : 'home-outline';
-           } else if (route.name === 'Capture') {
-             iconName = focused ? 'camera' : 'camera-outline';
-           } else if (route.name === 'Reports') {
-             iconName = focused ? 'bar-chart' : 'bar-chart-outline';
-           } else if (route.name === 'Video Call') {
-             iconName = focused ? 'videocam' : 'videocam-outline';
-           } else if (route.name === 'Patients') {
-             iconName = focused ? 'people' : 'people-outline';
-           } else if (route.name === 'My Doctors') {
-             iconName = focused ? 'person' : 'person-outline';
+           switch (route.name) {
+             case 'Home': iconName = focused ? 'home' : 'home-outline'; break;
+             case 'Capture': iconName = focused ? 'camera' : 'camera-outline'; break;
+             case 'Reports': iconName = focused ? 'bar-chart' : 'bar-chart-outline'; break;
+             case 'Video Call': iconName = focused ? 'videocam' : 'videocam-outline'; break;
+             case 'Maps': iconName = focused ? 'map' : 'map-outline'; break;             
+             case 'Patients': iconName = focused ? 'people' : 'people-outline'; break;
+             case 'My Doctors': iconName = focused ? 'person' : 'person-outline'; break;
+             default: iconName = 'ellipse';
            }
            return <Ionicons name={iconName} size={size} color={color} />;
          },
@@ -44,6 +42,7 @@ const TabNavigator = () => {
       <Tab.Screen name="Capture" component={CaptureStackNavigator} />
       <Tab.Screen name="Reports" component={ReportsScreen} />
       <Tab.Screen name="Video Call" component={VideoCallStackNavigator} />
+      <Tab.Screen name="Maps" component={MapsScreen} />  
       {user.role === 'doctor' && (
         <Tab.Screen name="Patients" component={PatientsStackNavigator} />
       )}

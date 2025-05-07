@@ -1,7 +1,8 @@
 // src/pages/HomeScreen.js
-import React from 'react';
-import { View, Text, Dimensions, StyleSheet, ScrollView } from 'react-native';
+import React, { useContext } from 'react';
+import { View, Text, Dimensions, StyleSheet, ScrollView, Button } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
+import { AuthContext } from '../../App';  // adjust path to where App.js exports it
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -16,43 +17,32 @@ const chartConfig = {
     borderRadius: 16,
   },
   propsForDots: {
-    r: "6",
-    strokeWidth: "2",
-    stroke: "#007AFF",
+    r: '6',
+    strokeWidth: '2',
+    stroke: '#007AFF',
   },
 };
 
-const HomeScreen = () => {
+const HomeScreen = ({ navigation }) => {
+  const { setUser } = useContext(AuthContext);
+
+  // Sign out by clearing user context, which resets navigation root
+  const handleSignOut = () => {
+    setUser(null);
+  };
+
   // Dummy data for the charts
-  const heartRateData = {
-    labels: ['', '', '', '', ''],
-    datasets: [
-      {
-        data: [72, 75, 70, 78, 74], // BPM values
-      },
-    ],
-  };
-
-  const oxygenData = {
-    labels: ['', '', '', '', ''],
-    datasets: [
-      {
-        data: [97, 98, 99, 98, 97], // Oxygen saturation in %
-      },
-    ],
-  };
-
-  const breathRateData = {
-    labels: ['', '', '', '', ''],
-    datasets: [
-      {
-        data: [16, 15, 17, 16, 16], // Breath rate in breaths/min
-      },
-    ],
-  };
+  const heartRateData = { labels: ['', '', '', '', ''], datasets: [{ data: [72, 75, 70, 78, 74] }] };
+  const oxygenData    = { labels: ['', '', '', '', ''], datasets: [{ data: [97, 98, 99, 98, 97] }] };
+  const breathRateData= { labels: ['', '', '', '', ''], datasets: [{ data: [16, 15, 17, 16, 16] }] };
 
   return (
     <ScrollView style={styles.container}>
+      {/* Sign Out button at top left */}
+      <View style={styles.signOutContainer}>
+        <Button title="Sign Out" onPress={handleSignOut} />
+      </View>
+
       <Text style={styles.greeting}>Hi Ahmed</Text>
 
       <View style={styles.chartContainer}>
@@ -98,6 +88,12 @@ const styles = StyleSheet.create({
     paddingTop: 50,
     paddingHorizontal: 20,
   },
+  signOutContainer: {
+    position: 'absolute',
+    top: 10,
+    left: 10,
+    zIndex: 1,
+  },
   greeting: {
     fontSize: 24,
     fontWeight: '600',
@@ -115,9 +111,7 @@ const styles = StyleSheet.create({
     color: '#007AFF',
     marginBottom: 10,
   },
-  chart: {
-    borderRadius: 16,
-  },
+  chart: { borderRadius: 16 },
 });
 
 export default HomeScreen;
